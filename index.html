@@ -1,116 +1,266 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FADROVIA PRYAN | Terminal</title>
+    <title>FADROVIA | TACTICAL SYSTEM</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
-        body { 
-            background-color: #000; 
-            color: #00ff00; 
-            font-family: 'Fira Code', monospace;
-            background-image: radial-gradient(#003300 0.5px, transparent 0.5px);
-            background-size: 30px 30px;
+        :root { --accent: #00ff41; --bg: #050505; --panel: rgba(20, 20, 20, 0.6); }
+        body { background-color: var(--bg); color: #e5e5e5; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Background Grid Animation */
+        .bg-grid {
+            position: fixed; inset: 0; z-index: -1;
+            background-image: linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
         }
-        .glitch { text-shadow: 2px 2px #ff0000, -2px -2px #0000ff; }
-        .border-hacker { border: 1px solid #00ff00; box-shadow: 0 0 10px rgba(0, 255, 0, 0.2); }
+
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: var(--panel); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+        }
+
+        /* Tab Transition */
+        .tab-content { display: none; animation: fadeIn 0.5s ease-out; }
+        .tab-content.active { display: block; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Nav Button Active State */
+        .nav-btn.active { background: rgba(0, 255, 65, 0.1); color: var(--accent); border-bottom: 2px solid var(--accent); }
+        .nav-btn { transition: 0.3s; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="min-h-screen flex flex-col">
 
-    <div class="mb-10 p-4 border-hacker bg-black/80">
-        <h1 class="text-3xl font-bold glitch uppercase tracking-tighter">System Access: FADROVIA PRYAN</h1>
-        <div class="grid grid-cols-1 md:grid-cols-2 mt-4 text-xs">
-            <div>[+] OPERATOR: FADROVIA PRYAN</div>
-            <div>[+] DEVICE: REDMI 9A (MT6762G Helio G25)</div>
-            <div>[+] HOST: TERMUX_LOCAL_HOST</div>
-            <div>[+] STATUS: <span class="animate-pulse">ENCRYPTED</span></div>
+    <div class="bg-grid"></div>
+
+    <header class="fixed top-0 w-full z-50 glass-panel border-b border-white/5 h-16 flex items-center justify-between px-6 lg:px-12">
+        <div class="flex items-center gap-3">
+            <div class="w-3 h-3 bg-[#00ff41] rounded-full animate-pulse shadow-[0_0_10px_#00ff41]"></div>
+            <span class="text-xl font-bold tracking-[0.2em] italic">FADROVIA<span class="text-[#00ff41]">_SYS</span></span>
         </div>
-    </div>
+        <div class="hidden md:flex gap-4 mono text-[10px] text-gray-500">
+            <span>UPTIME: <span id="uptime">00:00:00</span></span>
+            <span>SECURE_CONN: <span class="text-[#00ff41]">TRUE</span></span>
+        </div>
+    </header>
 
-    <div class="mb-10">
-        <h2 class="bg-green-600 text-black px-2 font-bold mb-4 w-fit inline-block">TERMINAL_LOGS.txt</h2>
-        <div class="space-y-4">
-            <div class="p-4 border-l-4 border-green-600 bg-zinc-900/50">
-                <h3 class="font-bold text-white">> Initializing Web Security...</h3>
-                <p class="text-sm text-gray-400">Hari ini berhasil deploy WAF via Vercel. Mengamankan endpoint dari serangan brute-force.</p>
+    <nav class="fixed top-16 left-0 w-full z-40 bg-black/80 border-b border-white/5 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto flex overflow-x-auto no-scrollbar">
+            <button onclick="switchTab('home')" id="btn-home" class="nav-btn active flex-1 py-4 px-6 text-sm font-bold tracking-widest uppercase hover:text-white">Home</button>
+            <button onclick="switchTab('profile')" id="btn-profile" class="nav-btn flex-1 py-4 px-6 text-sm font-bold tracking-widest uppercase hover:text-white">Profile</button>
+            <button onclick="switchTab('intel')" id="btn-intel" class="nav-btn flex-1 py-4 px-6 text-sm font-bold tracking-widest uppercase hover:text-white">Intel</button>
+            <button onclick="switchTab('arsenal')" id="btn-arsenal" class="nav-btn flex-1 py-4 px-6 text-sm font-bold tracking-widest uppercase hover:text-white">Arsenal</button>
+            <button onclick="switchTab('comm')" id="btn-comm" class="nav-btn flex-1 py-4 px-6 text-sm font-bold tracking-widest uppercase hover:text-white">Comm</button>
+        </div>
+    </nav>
+
+    <main class="flex-grow pt-36 pb-20 px-6 max-w-7xl mx-auto w-full">
+
+        <section id="home" class="tab-content active">
+            <div class="flex flex-col items-center justify-center min-h-[60vh] text-center">
+                <span class="mono text-[#00ff41] text-xs tracking-[0.5em] mb-4 border border-[#00ff41]/30 px-3 py-1 rounded">SYSTEM READY</span>
+                <h1 class="text-6xl md:text-9xl font-bold leading-none tracking-tighter mb-8">
+                    SOCIAL <br> <span class="text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-600">ENGINEER.</span>
+                </h1>
+                <p class="max-w-2xl text-gray-400 text-lg leading-relaxed">
+                    Selamat datang di FADROVIA NODE. Pusat komando intelijen siber dan rekayasa sosial. 
+                    Kami memanipulasi elemen manusia untuk mengamankan infrastruktur digital.
+                </p>
+                <div class="mt-12 flex gap-4">
+                    <button onclick="switchTab('profile')" class="px-8 py-3 bg-[#00ff41] text-black font-bold text-sm uppercase tracking-widest hover:shadow-[0_0_20px_#00ff41] transition">Initialize</button>
+                    <button onclick="switchTab('comm')" class="px-8 py-3 border border-gray-700 text-white font-bold text-sm uppercase tracking-widest hover:border-white transition">Contact</button>
+                </div>
             </div>
-            <div class="p-4 border-l-4 border-green-600 bg-zinc-900/50">
-                <h3 class="font-bold text-white">> Termux Optimization...</h3>
-                <p class="text-sm text-gray-400">Setting up SSH keys for automated git deployment. Workflow jadi makin cepet.</p>
+        </section>
+
+        <section id="profile" class="tab-content">
+            <div class="grid md:grid-cols-2 gap-12 items-start">
+                <div class="glass-panel p-8">
+                    <h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+                        <span class="w-1 h-8 bg-[#00ff41]"></span> IDENTITY
+                    </h2>
+                    <p class="text-gray-400 leading-loose mb-6">
+                        Nama Sandi: <strong class="text-white">FADROVIA</strong><br>
+                        Role: <span class="text-[#00ff41]">Cyber Security Researcher</span><br>
+                        Spesialisasi: Human Intelligence (HUMINT) & Network Penetration.<br>
+                        Misi: Mengidentifikasi kerentanan sebelum dieksploitasi oleh aktor jahat.
+                    </p>
+                    <p class="text-sm text-gray-500 italic">"Sistem terkuat sekalipun akan runtuh jika manusianya bisa dimanipulasi."</p>
+                </div>
+                <div class="glass-panel p-8">
+                    <h2 class="text-3xl font-bold mb-6">SKILLSET MATRIX</h2>
+                    <div class="space-y-6 mono text-xs">
+                        <div>
+                            <div class="flex justify-between mb-2"><span>SOCIAL ENGINEERING</span><span>98%</span></div>
+                            <div class="h-2 bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-[#00ff41] w-[98%]"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2"><span>NETWORK PENTESTING</span><span>90%</span></div>
+                            <div class="h-2 bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-[#00ff41] w-[90%]"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2"><span>OSINT (Info Gathering)</span><span>95%</span></div>
+                            <div class="h-2 bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-[#00ff41] w-[95%]"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2"><span>PYTHON & BASH</span><span>85%</span></div>
+                            <div class="h-2 bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-[#00ff41] w-[85%]"></div></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <h2 class="bg-green-600 text-black px-2 font-bold mb-4 w-fit inline-block">LOADED_MODULES (15)</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div class="p-3 border border-green-900 bg-black hover:bg-green-900/20 transition cursor-crosshair">
-            <span class="text-white font-bold">01. NMAP</span>
-            <p class="text-[10px] text-gray-400">Network scanning & OS detection.</p>
-        </div>
-        <div class="p-3 border border-green-900 bg-black hover:bg-green-900/20 transition">
-            <span class="text-white font-bold">02. METASPLOIT</span>
-            <p class="text-[10px] text-gray-400">Penetration testing framework.</p>
-        </div>
-        <div class="p-3 border border-green-900 bg-black hover:bg-green-900/20 transition">
-            <span class="text-white font-bold">03. SQLMAP</span>
-            <p class="text-[10px] text-gray-400">Automatic SQL injection tool.</p>
-        </div>
-        <div class="p-3 border border-green-900 bg-black hover:bg-green-900/20 transition">
-            <span class="text-white font-bold">04. BURPSUITE</span>
-            <p class="text-[10px] text-gray-400">Web app vulnerability scanner.</p>
-        </div>
-        <div class="p-3 border border-green-900 bg-black hover:bg-green-900/20 transition">
-            <span class="text-white font-bold">05. HYDRA</span>
-            <p class="text-[10px] text-gray-400">Network login cracker.</p>
-        </div>
-        <div class="p-3 border border-green-900 bg-black hover:bg-green-900/20 transition">
-            <span class="text-white font-bold">06. WIRESHARK</span>
-            <p class="text-[10px] text-gray-400">Packet sniffing & analysis.</p>
-        </div>
-        <div class="p-3 border border-green-900 bg-black hover:bg-green-900/20 transition">
-            <span class="text-white font-bold">07. AIRCRACK-NG</span>
-            <p class="text-[10px] text-gray-400">Wireless network auditor.</p>
-        </div>
-        <div class="p-3 border border-green-900 bg-black hover:bg-green-900/20 transition">
-            <span class="text-white font-bold">08. JOHN THE RIPPER</span>
-            <p class="text-[10px] text-gray-400">Password hash cracker.</p>
-        </div>
-        <div class="p-3 border border-green-900 bg-black hover:bg-green-900/20 transition">
-            <span class="text-white font-bold">09. NIKTO</span>
-            <p class="text-[10px] text-gray-400">Web server security scanner.</p>
-        </div>
-        <div class="p-3 border border-green-900 bg-black hover:bg-green-900/20 transition">
-            <span class="text-white font-bold">10. SHERLOCK</span>
-            <p class="text-[10px] text-gray-400">OSINT social media tracker.</p>
-        </div>
-        <div class="p-3 border border-green-900 bg-black hover:bg-green-900/20 transition">
-            <span class="text-white font-bold">11. BETTERCAP</span>
-            <p class="text-[10px] text-gray-400">MITM attack framework.</p>
-        </div>
-        <div class="p-3 border border-green-900 bg-black hover:bg-green-900/20 transition">
-            <span class="text-white font-bold">12. BEEF-XSS</span>
-            <p class="text-[10px] text-gray-400">Browser exploitation tool.</p>
-        </div>
-        <div class="p-3 border border-green-900 bg-black hover:bg-green-900/20 transition">
-            <span class="text-white font-bold">13. GOBUSTER</span>
-            <p class="text-[10px] text-gray-400">Directory & DNS busting.</p>
-        </div>
-        <div class="p-3 border border-green-900 bg-black hover:bg-green-900/20 transition">
-            <span class="text-white font-bold">14. SETOOLKIT</span>
-            <p class="text-[10px] text-gray-400">Social engineering kit.</p>
-        </div>
-        <div class="p-3 border border-green-900 bg-black hover:bg-green-900/20 transition">
-            <span class="text-white font-bold">15. MALTEGO</span>
-            <p class="text-[10px] text-gray-400">Information gathering tool.</p>
-        </div>
-    </div>
+        <section id="intel" class="tab-content">
+            <h2 class="text-4xl font-bold mb-10 border-b border-gray-800 pb-4">SECURITY <span class="text-[#00ff41]">BRIEFING</span></h2>
+            <div class="grid md:grid-cols-2 gap-12 text-gray-400 text-sm leading-relaxed text-justify">
+                <div class="space-y-6">
+                    <p>1. <span class="text-white font-bold">The Human Element:</span> Dalam rantai keamanan siber, manusia tetap menjadi mata rantai terlemah. Social Engineering tidak menyerang firewall, melainkan menyerang kepercayaan dan bias kognitif karyawan.</p>
+                    <p>2. <span class="text-white font-bold">Phishing Evolution:</span> Serangan phishing kini menggunakan AI untuk membuat email yang sangat personal dan meyakinkan, membuatnya hampir mustahil dibedakan dari komunikasi bisnis yang sah.</p>
+                    <p>3. <span class="text-white font-bold">Ransomware Ops:</span> Model bisnis RaaS (Ransomware-as-a-Service) memungkinkan penjahat pemula menyewa infrastruktur serangan canggih, meningkatkan frekuensi serangan terhadap UMKM hingga korporasi besar.</p>
+                    <p>4. <span class="text-white font-bold">Zero Trust:</span> Konsep "jangan percaya siapapun, verifikasi segalanya" adalah standar baru. Batas jaringan tradisional telah hilang; setiap akses, baik dari dalam maupun luar, harus diautentikasi secara ketat.</p>
+                    <p>5. <span class="text-white font-bold">Insider Threat:</span> Ancaman tidak selalu datang dari luar. Karyawan yang tidak puas atau yang akunnya telah dikompromikan seringkali memiliki akses istimewa yang bisa menyebabkan kerusakan fatal tanpa terdeteksi firewall.</p>
+                </div>
+                <div class="space-y-6">
+                    <p>6. <span class="text-white font-bold">Cloud Security:</span> Migrasi ke Cloud membawa tantangan miskonfigurasi. Bucket penyimpanan data yang terbuka untuk publik adalah salah satu penyebab kebocoran data terbesar di dekade ini.</p>
+                    <p>7. <span class="text-white font-bold">IoT Vulnerabilities:</span> Perangkat pintar (IoT) seringkali dikirim dengan keamanan minimal. Kamera CCTV atau printer yang terhubung ke internet bisa menjadi pintu belakang bagi peretas untuk masuk ke jaringan inti.</p>
+                    <p>8. <span class="text-white font-bold">Deepfake Threats:</span> Teknologi Deepfake audio dan video mulai digunakan dalam penipuan CEO (Business Email Compromise), di mana penyerang meniru suara atasan untuk memerintahkan transfer dana darurat.</p>
+                    <p>9. <span class="text-white font-bold">Supply Chain Attacks:</span> Menyusup ke penyedia layanan pihak ketiga (vendor) adalah cara efektif untuk menginfeksi ribuan target sekaligus, seperti yang terjadi pada kasus SolarWinds.</p>
+                    <p>10. <span class="text-white font-bold">Cyber Hygiene:</span> Pada akhirnya, 90% serangan bisa dicegah dengan kebersihan siber dasar: patch rutin, password kompleks, MFA, dan edukasi karyawan yang berkelanjutan.</p>
+                </div>
+            </div>
+        </section>
 
-    <footer class="mt-10 py-4 text-center text-[10px] border-t border-green-900">
-        SYSTEM_VER: 2.0.26 | TERMINAL_ACCESS_GRANTED
+        <section id="arsenal" class="tab-content">
+            <h2 class="text-4xl font-bold mb-10 border-b border-gray-800 pb-4">DEPLOYED <span class="text-[#00ff41]">TOOLS</span></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="glass-panel p-6 hover:bg-[#111] transition cursor-help group">
+                    <h4 class="mono text-[#00ff41] text-xs mb-2">NET_ATTACK</h4>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-[#00ff41]">Bettercap</h3>
+                    <p class="text-[10px] text-gray-500">The Swiss Army knife for 802.11, BLE, IPv4 and IPv6 networks reconnaissance and MITM attacks.</p>
+                </div>
+                <div class="glass-panel p-6 hover:bg-[#111] transition cursor-help group">
+                    <h4 class="mono text-[#00ff41] text-xs mb-2">TUNNELING</h4>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-[#00ff41]">Chisel</h3>
+                    <p class="text-[10px] text-gray-500">A fast TCP/UDP tunnel over HTTP. Perfect for bypassing firewalls and pivoting networks.</p>
+                </div>
+                <div class="glass-panel p-6 hover:bg-[#111] transition cursor-help group">
+                    <h4 class="mono text-[#00ff41] text-xs mb-2">SCANNING</h4>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-[#00ff41]">Rustscan</h3>
+                    <p class="text-[10px] text-gray-500">The Modern Port Scanner. Able to scan all 65k ports in seconds via adaptive scripts.</p>
+                </div>
+                <div class="glass-panel p-6 hover:bg-[#111] transition cursor-help group">
+                    <h4 class="mono text-[#00ff41] text-xs mb-2">POST_EXP</h4>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-[#00ff41]">Evil-WinRM</h3>
+                    <p class="text-[10px] text-gray-500">The ultimate shell for hacking Windows Remote Management services. Stealthy and stable.</p>
+                </div>
+                <div class="glass-panel p-6 hover:bg-[#111] transition cursor-help group">
+                    <h4 class="mono text-[#00ff41] text-xs mb-2">ACTIVE_DIR</h4>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-[#00ff41]">BloodHound</h3>
+                    <p class="text-[10px] text-gray-500">Uses graph theory to reveal hidden relationships and attack paths in an Active Directory.</p>
+                </div>
+                <div class="glass-panel p-6 hover:bg-[#111] transition cursor-help group">
+                    <h4 class="mono text-[#00ff41] text-xs mb-2">POISONING</h4>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-[#00ff41]">Responder</h3>
+                    <p class="text-[10px] text-gray-500">LLMNR, NBT-NS and MDNS poisoner. It answers specific NBT-NS queries to steal hashes.</p>
+                </div>
+                <div class="glass-panel p-6 hover:bg-[#111] transition cursor-help group">
+                    <h4 class="mono text-[#00ff41] text-xs mb-2">WEB_BRUTE</h4>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-[#00ff41]">Feroxbuster</h3>
+                    <p class="text-[10px] text-gray-500">A simple, fast, recursive content discovery tool written in Rust. Finds hidden web dirs.</p>
+                </div>
+                <div class="glass-panel p-6 hover:bg-[#111] transition cursor-help group">
+                    <h4 class="mono text-[#00ff41] text-xs mb-2">PHISHING</h4>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-[#00ff41]">Evilginx2</h3>
+                    <p class="text-[10px] text-gray-500">Standalone man-in-the-middle attack framework used for phishing login credentials & 2FA.</p>
+                </div>
+                <div class="glass-panel p-6 hover:bg-[#111] transition cursor-help group">
+                    <h4 class="mono text-[#00ff41] text-xs mb-2">ANONYMITY</h4>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-[#00ff41]">Proxychains</h3>
+                    <p class="text-[10px] text-gray-500">Forces any TCP connection made by any given application to follow through a proxy like TOR.</p>
+                </div>
+                <div class="glass-panel p-6 hover:bg-[#111] transition cursor-help group">
+                    <h4 class="mono text-[#00ff41] text-xs mb-2">EXPLOIT</h4>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-[#00ff41]">Metasploit</h3>
+                    <p class="text-[10px] text-gray-500">The world's most used penetration testing framework. Essential for exploit development.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="comm" class="tab-content">
+            <div class="max-w-xl mx-auto glass-panel p-10">
+                <h2 class="text-2xl font-bold mb-8 mono text-center">ENCRYPTED_TRANSMISSION</h2>
+                <form onsubmit="event.preventDefault(); alert('MESSAGE ENCRYPTED AND SENT TO FADROVIA SERVER.');" class="space-y-6">
+                    <div>
+                        <label class="block text-xs mono text-gray-500 mb-2">SENDER_ID</label>
+                        <input type="text" class="w-full bg-black/50 border border-gray-700 p-3 text-white focus:border-[#00ff41] focus:outline-none" placeholder="Enter your alias...">
+                    </div>
+                    <div>
+                        <label class="block text-xs mono text-gray-500 mb-2">PAYLOAD (MESSAGE)</label>
+                        <textarea rows="5" class="w-full bg-black/50 border border-gray-700 p-3 text-white focus:border-[#00ff41] focus:outline-none" placeholder="Type your secure message..."></textarea>
+                    </div>
+                    <button class="w-full bg-[#00ff41] text-black font-bold py-4 uppercase tracking-[0.2em] hover:bg-white transition">Execute Send</button>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="fixed bottom-0 w-full z-40 bg-black/90 border-t border-white/5 py-2 px-6 flex justify-between items-center text-[9px] mono text-gray-600 uppercase">
+        <div>SYSTEM: ONLINE</div>
+        <div>FADROVIA © 2026</div>
+        <div class="text-[#00ff41]">NO_LOGS_POLICY</div>
     </footer>
 
+    <script>
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            // Show selected tab content
+            document.getElementById(tabId).classList.add('active');
+
+            // Update button states
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.color = '';
+                btn.style.borderBottom = '';
+            });
+            
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.add('active');
+            
+            // Scroll to top smoothly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Uptime Clock
+        let seconds = 0;
+        setInterval(() => {
+            seconds++;
+            const date = new Date(seconds * 1000);
+            const hh = String(date.getUTCHours()).padStart(2, '0');
+            const mm = String(date.getUTCMinutes()).padStart(2, '0');
+            const ss = String(date.getUTCSeconds()).padStart(2, '0');
+            document.getElementById('uptime').innerText = `${hh}:${mm}:${ss}`;
+        }, 1000);
+    </script>
 </body>
 </html>
